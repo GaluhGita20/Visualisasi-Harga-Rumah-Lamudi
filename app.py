@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import json
 import pickle
+from src.linear_regression import mainprog
+import locale
 
 with open('model/model.pkl', 'rb') as file:
     model = pickle.load(file)
@@ -25,12 +27,13 @@ def index():
 def predict():
     values = request.values
 
-    X_new = {'kamar_tidur': [int(values['kamar_tidur'])], 'kamar_mandi': [int(values['kamar_mandi'])], 'jmlh_lantai': [int(values['jmlh_lantai'])], 'luas_bangunan': [int(values['luas_bangunan'])], 'luas_tanah': [int(values['luas_tanah'])]}
-    X_new = pd.DataFrame(X_new) 
-    price_predict_dtr= model.predict(X_new)
-    output_model = round(int(price_predict_dtr[0]), 2)
+    # X_new = {'kamar_tidur': [int(values['kamar_tidur'])], 'kamar_mandi': [int(values['kamar_mandi'])], 'jmlh_lantai': [int(values['jmlh_lantai'])], 'luas_bangunan': [int(values['luas_bangunan'])], 'luas_tanah': [int(values['luas_tanah'])]}
 
-    return render_template('index.html', prediction_text='Hasil Prediksi Rumah : Rp. {} '.format(output_model))
+    predict, values = mainprog(values['kabupaten'], int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah'])) 
+    # locale.setlocale(locale.LC_ALL, 'id_ID')
+
+    # formatted_price = locale.currency(predict, grouping=True)
+    return render_template('index.html', prediction_text='Hasil Prediksi Rumah : Rp. {} '.format(int(predict)), values=values)
 
 @app.route('/get_heatmap_data')
 def get_heatmap_data():
