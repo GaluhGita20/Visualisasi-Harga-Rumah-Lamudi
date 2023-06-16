@@ -1,0 +1,140 @@
+{% extends "dsh_templates.html"%}
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+  
+{% block content %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <div style="height: 578px">
+    <div style=" float: right; margin-right:5px; margin-bottom:20px">
+    </div>
+    <button  type="button" class ="btn btn-primary"data-target=".bd-example-modal-lg" data-toggle="modal">Input Data</button>
+    <div class="card text-center" style="margin-top:10px;">
+        <div class="card-header bg-primary text-white font-weight-bold">
+            <h5>Hasil Prediksi</h5>
+        </div>
+        <div class="card-body">
+            <h5 class="card-text">{{ prediction_text }}</h5>
+        </div>
+    </div>
+
+    <table id="example" class="table table-striped table-bordered" style="width:100%">
+        <thead>
+            <tr>
+                <th>Judul</th>
+                <th>Harga</th>
+                <th>Alamat</th>
+                <th>Parkir Motor</th>
+                <th>Kamar Tidur</th>
+                <th>Kamar Mandi</th>
+                <th>Jumlah Lantai</th>
+                <th>Luas Bangunan</th>
+                <th>Luas Tanah</th>
+                <th>Kabupaten</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if values.any().any() %}
+            {% for index, row in values.iterrows() if values.any().any()%}
+            <tr>
+                <td>{{ row['title'] }}</td>
+                <td>{{ row['harga'] }}</td>
+                <td>{{ row['alamat'] }}</td>
+                <td>{{ row['parkir_motor'] }}</td>
+                <td>{{ row['kamar_tidur'] }}</td>
+                <td>{{ row['kamar_mandi'] }}</td>
+                <td>{{ row['jmlh_lantai'] }}</td>
+                <td>{{ row['luas_bangunan'] }}</td>
+                <td>{{ row['luas_tanah'] }}</td>
+                <td>{{ row['kabupaten'] }}</td>
+            </tr>
+            {% endfor %}
+        {%endif%}
+        </tbody>
+    </table>
+
+  <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form action="{{ url_for('predict')}}" method="post">
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="kamar_tidur">Kamar Tidur</label>
+                        <input type="number" name="kamar_tidur" class="form-control" id="kamar_tidur"
+                            placeholder="Insert Bedroom Range (1 - 20)" min="1" max="20"
+                            required="required">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="kamar_mandi">Kamar Mandi</label>
+                        <input type="number" name="kamar_mandi" class="form-control" id="kamar_mandi"
+                            placeholder="Insert Bathroom Range (1 - 10)" min="1" max="10"
+                            required="required">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="luas_bangunan">Luas Bangunan</label>
+                        <input type="number" name="luas_bangunan" class="form-control" id="luas_bangunan"
+                            placeholder="Insert Building Area Range (20 - 200) m2" min="20" max="200"
+                            required="required">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="luas_tanah">Luas Tanah</label>
+                        <input type="number" name="luas_tanah" class="form-control" id="luas_tanah"
+                            placeholder="Insert Surface Area Range (30 - 250) m2" min="30" max="250"
+                            required="required">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="jmlh_lantai">Jumlah Lantai</label>
+                        <input type="number" name="jmlh_lantai" class="form-control" id="jmlh_lantai"
+                            placeholder="Insert Floor Range (1 - 5) m2" min="1" max="5"
+                            required="required">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="kabupaten">Kabupaten</label>
+                        <select name="kabupaten" class="form-control" id="kabupaten" required="required">
+                            <option value="">Pilih Kabupaten</option>
+                            <option value="buleleng">buleleng</option>
+                            <option value="karangasem">karangasem</option>
+                            <option value="gianyar">gianyar</option>
+                            <option value="badung">badung</option>
+                            <option value="tabanan">tabanan</option>
+                            <option value="jembrana">jembrana</option>
+                            <option value="bangli">bangli</option>
+                            <option value="denpasar">denpasar</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12 text-center mt-3 mb-5">
+                    <div id="success"></div>
+                    <button class="btn btn-info" type="submit">Prediksi</button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> 
+
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#example').DataTable();
+    });
+</script>
+
+{%endblock%}
