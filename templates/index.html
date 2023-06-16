@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -106,25 +105,27 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for index, row in values.iterrows() %}
-                                <tr>
-                                    <td>{{ row['title'] }}</td>
-                                    <td>{{ row['harga'] }}</td>
-                                    <td>{{ row['alamat'] }}</td>
-                                    <td>{{ row['parkir_motor'] }}</td>
-                                    <td>{{ row['kamar_tidur'] }}</td>
-                                    <td>{{ row['kamar_mandi'] }}</td>
-                                    <td>{{ row['jmlh_lantai'] }}</td>
-                                    <td>{{ row['luas_bangunan'] }}</td>
-                                    <td>{{ row['luas_tanah'] }}</td>
-                                    <td>{{ row['kabupaten'] }}</td>
-                                </tr>
-                                {% endfor %}
+                                {% if values.any().any() %}
+                                    {% for index, row in values.iterrows() if values.any().any()%}
+                                    <tr>
+                                        <td>{{ row['title'] }}</td>
+                                        <td>{{ row['harga'] }}</td>
+                                        <td>{{ row['alamat'] }}</td>
+                                        <td>{{ row['parkir_motor'] }}</td>
+                                        <td>{{ row['kamar_tidur'] }}</td>
+                                        <td>{{ row['kamar_mandi'] }}</td>
+                                        <td>{{ row['jmlh_lantai'] }}</td>
+                                        <td>{{ row['luas_bangunan'] }}</td>
+                                        <td>{{ row['luas_tanah'] }}</td>
+                                        <td>{{ row['kabupaten'] }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {%endif%}
                             </tbody>
                         </table>
                     </form>
                 </div>
-                
+
             </div>
             <div class="row" style="margin-top:40px;">
                 <div class="col-md-12">
@@ -133,6 +134,7 @@
                     <div id="heatmap" style="text-align:center; justify-content:center; align-items:center;"></div>
                 </div>
             </div>
+
             <div class="row" style="margin-top:40px;">  
                 <div class="col-md-6">
                     <h4>Visualisasi Data Scatter Plot (Luas Bangunan)</h4>
@@ -145,6 +147,7 @@
                     <div id="scatterPlotLT"></div>
                 </div>
             </div>
+
             <div class="row" style="margin-top:40px;">  
                 <div class="col-md-12">
                     <h4>Visualisasi Data Horizontal Lolipop Chart</h4>
@@ -153,6 +156,7 @@
                 </div>
             </div>
         </div>
+
     </div>
     
     
@@ -163,7 +167,7 @@
     <script src="https://d3js.org/d3.v4.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script>
-        const heatmap = "{{ url_for('get_heatmap_data') }}";
+        const heatmap = "{{ url_for('get_heatmap_data')}}";
         const scatterplotDataLBUrl = "{{ url_for('get_scatterplot_dataLB') }}";
         const scatterplotDataLTUrl = "{{ url_for('get_scatterplot_dataLT') }}";
         const lolipopChartDataUrl = "{{ url_for('get_lolipopchart_data') }}";
