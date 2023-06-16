@@ -4,8 +4,10 @@ import numpy as np
 import json
 import pickle
 from src.linear_regression import mainprog
+
 import locale
 import pymysql
+
 with open('model/model.pkl', 'rb') as file:
     model = pickle.load(file)
 app = Flask(__name__)
@@ -31,10 +33,12 @@ def index():
     datas = datas[datas['harga'] == 1000000000000000000000000000]
     return render_template('form.html',values=datas)
 
+
 #Predict Data
 @app.route('/predict', methods=['POST'])
 def predict():
     values = request.values
+
     # X_new = {'kamar_tidur': [int(values['kamar_tidur'])], 'kamar_mandi': [int(values['kamar_mandi'])], 'jmlh_lantai': [int(values['jmlh_lantai'])], 'luas_bangunan': [int(values['luas_bangunan'])], 'luas_tanah': [int(values['luas_tanah'])]}
    
     predict, val = mainprog(values['kabupaten'], int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah'])) 

@@ -57,4 +57,3 @@ def linear_regression(data, kabupaten):
 # print(f"hasil prediksi harga rumah di kabupaten {kab} yaitu {hasil}")
 
 
-
