@@ -4,7 +4,6 @@ import numpy as np
 import json
 import pickle
 from src.linear_regression import mainprog
-import locale
 
 with open('model/model.pkl', 'rb') as file:
     model = pickle.load(file)
@@ -20,20 +19,17 @@ def index():
     datas =  data_df.groupby('luas_bangunan')['harga'].mean().reset_index()
     grouped_dict =  datas.to_dict(orient='list')
     my_dict = {key: value for key, value in zip(grouped_dict['luas_bangunan'], grouped_dict['harga'])}
-    return render_template('index.html', df='')
+    datas=datas[datas['harga']==10000000000000]
+    return render_template('index.html', value=datas)
 
 # Desicion Tree
 @app.route('/predict', methods=['POST'])
 def predict():
     values = request.values
 
-    # X_new = {'kamar_tidur': [int(values['kamar_tidur'])], 'kamar_mandi': [int(values['kamar_mandi'])], 'jmlh_lantai': [int(values['jmlh_lantai'])], 'luas_bangunan': [int(values['luas_bangunan'])], 'luas_tanah': [int(values['luas_tanah'])]}
-
-    predict, values = mainprog(values['kabupaten'], int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah'])) 
-    # locale.setlocale(locale.LC_ALL, 'id_ID')
-
-    # formatted_price = locale.currency(predict, grouping=True)
-    return render_template('index.html', prediction_text='Hasil Prediksi Rumah : Rp. {} '.format(int(predict)), values=values)
+    predict, value = mainprog(values['kabupaten'], int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah'])) 
+ 
+    return render_template('index.html', prediction_text='Hasil Prediksi Rumah : Rp. {} '.format(int(predict)), value=value)  
 
 @app.route('/get_heatmap_data')
 def get_heatmap_data():
