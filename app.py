@@ -4,6 +4,7 @@ import numpy as np
 import json
 import pickle
 from src.linear_regression import mainprog
+from src.linear_regression import label_decode_kab
 import locale
 import pymysql
 with open('model/model.pkl', 'rb') as file:
@@ -37,14 +38,12 @@ def predict():
     values = request.values
     # X_new = {'kamar_tidur': [int(values['kamar_tidur'])], 'kamar_mandi': [int(values['kamar_mandi'])], 'jmlh_lantai': [int(values['jmlh_lantai'])], 'luas_bangunan': [int(values['luas_bangunan'])], 'luas_tanah': [int(values['luas_tanah'])]}
    
-    predict, val = mainprog(values['kabupaten'], int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah'])) 
-    # locale.setlocale(locale.LC_ALL, 'id_ID')
-  
-    # hasil1 = pd.DataFrame([[values['kabupaten'],values['luas_tanah'],values['luas_bangunan'],values['kamar_tidur'],values['kamar_mandi'],values['jmlh_lantai'],predict]], columns =[['Kabupaten','Luas Tanah','Luas Bangunan','Kamar Tidur','Kamar Mandi','Jumlah Lantai','Hasil Prediksi Harga']])
-    # hasil = pd.concat([hasil,hasil1]).reset_index(drop=True)
+    predict, val = mainprog(int(values['kabupaten']), int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah'])) 
+    # locale.setlocale(locale.LC_ALL,'id_ID')
+    kabs = label_decode_kab(int(values['kabupaten']))
     if values !=None:
         query = "INSERT INTO prediksi (kabupaten , kamar_tidur , kamar_mandi , jumlah_lantai ,luas_bangunan , luas_tanah ,harga) VALUES(%s,%s,%s,%s,%s,%s,%s)"
-        values = (values['kabupaten'], int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah']), int(predict))
+        values = (kabs, int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah']), int(predict))
         mycursor = mydb.cursor()
         mycursor.execute(query,values)
         mydb.commit()
