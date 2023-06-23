@@ -20,8 +20,8 @@ mydb = pymysql.connect(
 )
 
 #Reading data
-file_path_dataset = 'D:/Web Data Viz/Visualisasi-Harga-Rumah-Lamudi/static/data/data harga rumah clean baru.csv'
-file_path_heatmap = 'D:/Web Data Viz/Visualisasi-Harga-Rumah-Lamudi/static/data/heatmap_data.csv'
+file_path_dataset = 'static/data/data harga rumah clean baru.csv'
+file_path_heatmap = 'static/data/heatmap_data.csv'
 data_df = pd.read_csv(file_path_dataset)
 data_heatmap = pd.read_csv(file_path_heatmap)
 

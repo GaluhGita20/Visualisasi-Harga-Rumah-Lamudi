@@ -10,7 +10,7 @@ def predict_linear_regression(model, data):
 
 # Main Program
 def mainprog(kabupaten, kamar_tidur, kamar_mandi, jmlh_lantai, luas_bangunan, luas_tanah):
-    file_path = 'D:/Web Data Viz/Visualisasi-Harga-Rumah-Lamudi/static/data/data harga rumah clean baru.csv'
+    file_path = 'static/data/data harga rumah clean baru.csv'
     data = pd.read_csv(file_path)
     kabupaten = kabupaten
     model = linear_regression(data, kabupaten)
