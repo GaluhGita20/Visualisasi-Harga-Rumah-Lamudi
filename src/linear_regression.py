@@ -181,4 +181,3 @@ def label_decode_kab(kab):
 # print(f"hasil prediksi harga rumah di kabupaten {kab} yaitu {hasil}")
 
 
-
