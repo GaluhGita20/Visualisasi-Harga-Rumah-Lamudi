@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Peta Pulau Bali</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src ="https://d3js.org/topojson.v1.min.js"></script>
+  <style>
+    svg {
+      background-color: #f2f2f2;
+    }
+
+    .district:hover {
+        fill: rgb(9, 152, 180);
+    } 
+  </style>
+</head>
+<body>
+
+
+  <button type="button" id="getDataButton" style="width: 50; height:20; color:black;">Dapatkan Data</button>
+  <div id="dataContainer"></div>
+  <h1>Visualisasi Peta Bali</h1>
+  <svg id="map" width="800" height="600"></svg>
+
+</body>
+<script>
+  var datac = ''
+  getDataButton.addEventListener("click", function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/test2', true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          var response = JSON.parse(xhr.responseText); 
+          datac= response
+          console.log(datac)
+
+          const width = 800;
+          const height = 600;
+
+          const projection = d3.geoMercator()
+          .center([115.1889, -8.4095]) // Koordinat tengah peta
+          .scale(30000) // Skala peta
+          .translate([width / 2, height / 2]); // Posisi peta di SVG
+          
+          const path = d3.geoPath()
+          .projection(projection);
+
+          //membuat elemen svg
+          const svg = d3.select("#map")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+          var domain = [500000, 700000, 800000, 900000,1100000]; // Rentang nilai kepadatan penduduk
+          var range = ['lightgray', 'pink', 'green', 'yellow','black']; // Warna yang ingin ditampilkan
+
+          var colorScale = d3.scaleThreshold()
+            .domain(domain)
+            .range(range);
+          var dataf = response
+
+          d3.json("https://raw.githubusercontent.com/teguha/peta-bali/main/kabupaten-bali.geojson").then(function(data){
+              console.log(data.features)
+                  //menampilkan peta bali
+              svg.selectAll("path")
+                  .data(data.features)
+                  .enter()
+                  .append("path")
+                  .attr("d", path)
+                  .attr("stroke",'white')
+                  .attr("stroke-width",0.7)
+                  .attr("x", 115) // Koordinat X posisi teks
+                  .attr("y", -8) // Koordinat Y posisi teks
+                  .text("Keterangan teks")
+                  .attr("class","district")
+                  .attr('fill',function(d){
+                      var rs = dataf.find(function(element) {
+                          element.nama === d.properties.nm_kabkota
+                          return element.kepadatan_penduduk 
+                      });
+                      
+                      if (rs != null){
+                        return colorScale(rs.kepadatan_penduduk)
+                      }else{
+                        return "orange"
+                      }
+                  })
+                  .on("mouseover", function(event, d) {
+                    d3.select(this)
+                    var result = dataf.find(function(element) {
+                        return element.nama === d.properties.nm_kabkota;
+                    });
+                          
+                    if (result != undefined){
+                        svg
+                          .append("text")
+                          //.attr("fill", colorScale(result.kepadatan_penduduk))
+                          .attr("id", "tooltip1")
+                          .attr("x", event.pageX)
+                          .attr("y", event.pageY - 25)
+                          .attr("fill",'black')
+                          .text(result.kepadatan_penduduk);
+                    }
+                    svg
+                      .append("text")
+                      .attr("id", "tooltip")
+                      .attr("x", event.pageX)
+                      .attr("y", event.pageY - 5)
+                      .text(d.properties.nm_kabkota);
+
+              })
+              .on("mouseout", function() {
+                //d3.select(this).attr("fill", "black");
+                svg.select("#tooltip").remove();
+                svg.select("#tooltip1").remove();
+              }).attr("fill",function(d){
+                  
+                var rs = dataf.find(function(element) {
+                  return element.nama === d.properties.nm_kabkota
+                  return element.kepadatan_penduduk
+                });  
+                //console.log(rs)
+              
+                if (rs != null){
+                  return colorScale(rs.kepadatan_penduduk)
+                }else{
+                  return "orange"
+                }
+              }); 
+            })
+          }   
+    }
+    xhr.send();
+  });
+        
+    
+    
+
+
+
+
+  /*
+    const width = 800;
+    const height = 600;
+
+    const projection = d3.geoMercator()
+    .center([115.1889, -8.4095]) // Koordinat tengah peta
+    .scale(30000) // Skala peta
+    .translate([width / 2, height / 2]); // Posisi peta di SVG
+  
+    const path = d3.geoPath()
+      .projection(projection);
+
+    //membuat elemen svg
+    const svg = d3.select("#map")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    var domain = [500000, 700000, 800000, 900000,1100000]; // Rentang nilai kepadatan penduduk
+    var range = ['lightgray', 'pink', 'green', 'yellow','black']; // Warna yang ingin ditampilkan
+
+    var colorScale = d3.scaleThreshold()
+      .domain(domain)
+      .range(range);
+
+    /*var dataf = [
+        { "nama": "DENPASAR", "kepadatan_penduduk": 500000 },
+        { "nama": "JEMBRANA", "kepadatan_penduduk": 800000 },
+        { "nama": "GIANYAR", "kepadatan_penduduk": 600000 },
+        // ...
+    ];*/
+    //var target = "DENPASAR";
+    /*
+    d3.json("https://raw.githubusercontent.com/teguha/peta-bali/main/kabupaten-bali.geojson").then(function(data){
+        console.log(data.features)
+            //menampilkan peta bali
+        svg.selectAll("path")
+            .data(data.features)
+            .enter()
+            .append("path")
+            .attr("d", path)
+            .attr("stroke",'white')
+            .attr("stroke-width",0.7)
+            .attr("x", 115) // Koordinat X posisi teks
+            .attr("y", -8) // Koordinat Y posisi teks
+            .text("Keterangan teks")
+            .attr("class","district")
+            .attr('fill',function(d){
+                var rs = dataf.find(function(element) {
+                    element.nama === d.properties.nm_kabkota
+                    return element.kepadatan_penduduk 
+                });
+                
+                if (rs != null){
+                  return colorScale(rs.kepadatan_penduduk)
+                }else{
+                  return "orange"
+                }
+            })
+            .on("mouseover", function(event, d) {
+              d3.select(this)
+              var result = dataf.find(function(element) {
+                  return element.nama === d.properties.nm_kabkota;
+              });
+                    
+              if (result != undefined){
+                  svg
+                    .append("text")
+                    //.attr("fill", colorScale(result.kepadatan_penduduk))
+                    .attr("id", "tooltip1")
+                    .attr("x", event.pageX)
+                    .attr("y", event.pageY - 25)
+                    .attr("fill",'black')
+                    .text(result.kepadatan_penduduk);
+              }
+              svg
+                .append("text")
+                .attr("id", "tooltip")
+                .attr("x", event.pageX)
+                .attr("y", event.pageY - 5)
+                .text(d.properties.nm_kabkota);
+
+        })
+        .on("mouseout", function() {
+          //d3.select(this).attr("fill", "black");
+          svg.select("#tooltip").remove();
+          svg.select("#tooltip1").remove();
+        }).attr("fill",function(d){
+            
+          var rs = dataf.find(function(element) {
+            return element.nama === d.properties.nm_kabkota
+            return element.kepadatan_penduduk
+          });  
+          //console.log(rs)
+        
+          if (rs != null){
+            return colorScale(rs.kepadatan_penduduk)
+          }else{
+            return "orange"
+          }
+        });
+        
+    })*/
+</script>
+</html>

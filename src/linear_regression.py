@@ -5,7 +5,7 @@ import numpy as np
 import pickle
 
 paths= 'D:/Web Data Viz/Visualisasi-Harga-Rumah-Lamudi/model/'
-
+file_path_dataset = 'D:/Web Data Viz/Visualisasi-Harga-Rumah-Lamudi/static/data/data harga rumah clean baru.csv'
 # Predict Data
 def predict_linear_regression(data):
     with open(paths+'model_linear_regression.pkl', 'rb') as file:
@@ -59,11 +59,52 @@ def mainprog(kabupaten, kamar_tidur, kamar_mandi, jmlh_lantai, luas_bangunan, lu
     df_concat['harga'] = df_concat['harga'].apply(lambda x : scl_inv_harga(x))
 
     #inverse Scaling Prediksi
+    #{:,.0f}
     predict = scl_inv_harga(predictions[0][0])
     
     #filtered_data = filtered_data[(filtered_data['harga'] >= predictions.min()) | (filtered_data['harga'] <= predictions.max())].head(10)
     #filtered_data = filtered_data[(filtered_data['harga'].between(predictions - 10000000, predictions + 10000000, inclusive=True))].head(5)
     return predict,df_concat
+
+# predict di semua kabupaten dengan parameter yang sama
+def mecprog(kamar_tidur, kamar_mandi, jmlh_lantai, luas_bangunan, luas_tanah):
+    file_path = 'D:/Web Data Viz/Visualisasi-Harga-Rumah-Lamudi/static/data/Normalisasi Data Rumah.csv'
+    data = pd.read_csv(file_path)
+    #model = linear_regression(data, kabupaten)
+    
+    #Encoding Kabupaten Data
+    #kabupaten = label_encode(kabupaten)
+
+    #Scaling Data
+    hasil =[]
+    kab =[]
+    kamar_tidur = scl_trans_kamar_tidur(kamar_tidur)
+    kamar_mandi = scl_trans_kamar_mandi(kamar_mandi)  
+    luas_tanah = scl_trans_luas_tanah(luas_tanah)  
+    luas_bangunan = scl_trans_luas_bangunan(luas_bangunan)
+    jmlh_lantai = scl_trans_jumlah_lantai(jmlh_lantai)
+    for x in range(0,8):
+    # Membuat data baru untuk prediksi
+        new_data = pd.DataFrame({
+            'kamar_tidur': [kamar_tidur],
+            'kamar_mandi': [kamar_mandi],
+            'jmlh_lantai': [jmlh_lantai],
+            'luas_bangunan': [luas_bangunan],
+            'luas_tanah': [luas_tanah],
+            'kabupaten':[x]
+        })
+        predictions = predict_linear_regression(new_data)
+        predict = scl_inv_harga(predictions[0][0])
+        kabupaten = label_decode_kab(x)
+        hasil.append(int(predict))
+        kab.append(kabupaten.upper())
+
+    df = pd.DataFrame({"kabupaten":kab, "hasil_prediksi":hasil})
+    #df["hasil prediksi"].sort_values(ascending=True)
+    df_sorted = df.sort_values(by="hasil_prediksi" , ascending=True)
+    json_d = df_sorted.to_json(orient="records")
+    return json_d
+    #return df.sort_values(by="Hasil Prediksi" , ascending=True)
 
 #Training Model gak dipakai
 def linear_regression(data, kabupaten):
@@ -162,9 +203,18 @@ def label_decode_kab(kab):
         kab='tabanan'
     elif kab ==6:
         kab='badung'
-    else:
+    elif kab ==7:
         kab='denpasar'
     return kab
+
+# df1= pd.read_csv(file_path_dataset)
+# df1 = df1.groupby("kabupaten")["harga"].mean()
+# data = pd.DataFrame({"kabupaten":df1.index, "harga":df1.values})
+# for x in range(0,9):
+#     print(df1.index[x].upper())
+
+# data = data.sort_values(by="harga",ascending=True)
+# print(data)
 
 # def kabupaten(data):
 #     kabupa
@@ -175,9 +225,8 @@ def label_decode_kab(kab):
 # kmt = int(input("masukan kamar tidur "))
 # kmd = int(input("masukakan kamar mandi "))
 # lt1 = int(input("masukan jumlah lantai "))
-# kab = int(input("masukan kabupaten "))
 
-# hasil = mainprog(kab , kmt, kmd , lt1 , lb , lt)
-# print(f"hasil prediksi harga rumah di kabupaten {kab} yaitu {hasil}")
+# hasil = mecprog(kmt, kmd , lt1 , lb , lt)
+# print(f"hasil prediksi harga rumah di semua kab yaitu {hasil}")
 
 
