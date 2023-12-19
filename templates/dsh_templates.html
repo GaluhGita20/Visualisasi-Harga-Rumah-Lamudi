@@ -30,6 +30,15 @@
         <!-- Sidebar navigation-->
         <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
           <ul id="sidebarnav">
+            <li class="sidebar-item" {% if request.path == '/heatmap' %} class="active" {% endif
+              %}>
+              <a class="sidebar-link" href="{{url_for('heatmap')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Dashboard</span>
+              </a>
+            </li>
             <li class="sidebar-item" {% if request.path == '/' %} class="active" {% endif
               %}>
               <a class="sidebar-link" href="{{ url_for('index') }}" aria-expanded="false">
@@ -39,17 +48,7 @@
                 <span class="hide-menu">Predict</span>
               </a>
             </li>
-
-            <li class="sidebar-item" {% if request.path == '/heatmap' %} class="active" {% endif
-              %}>
-              <a class="sidebar-link" href="{{url_for('heatmap')}}" aria-expanded="false">
-                <span>
-                  <i class="ti ti-layout-dashboard"></i>
-                </span>
-                <span class="hide-menu">Heatmap Chart</span>
-              </a>
-            </li>
-            <li class="sidebar-item" {% if request.path == '/scatter' %} class="active" {% endif
+            <!-- <li class="sidebar-item" {% if request.path == '/scatter' %} class="active" {% endif
               %}>
               <a class="sidebar-link" href="{{url_for('scatter')}}" aria-expanded="false">
                 <span>
@@ -57,8 +56,8 @@
                 </span>
                 <span class="hide-menu">Scatter Chart</span>
               </a>
-            </li>
-            <li class="sidebar-item" {% if request.path == '/lolipop' %} class="active" {% endif
+            </li> -->
+            <!-- <li class="sidebar-item" {% if request.path == '/lolipop' %} class="active" {% endif
               %}>
               <a class="sidebar-link" href="{{url_for('lolipop')}}" aria-expanded="false">
                 <span>
@@ -66,7 +65,7 @@
                 </span>
                 <span class="hide-menu">Lolipop Chart</span>
               </a>
-            </li>
+            </li> -->
             <li class="sidebar-item" {% if request.path == '/laporan' %} class="active" {% endif
               %}>
               <a class="sidebar-link" href="{{url_for('laporan')}}" aria-expanded="false">

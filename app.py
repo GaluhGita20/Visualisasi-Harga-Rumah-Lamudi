@@ -1,9 +1,11 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, redirect,make_response,url_for, request
 import pandas as pd
 import numpy as np
 import json
 import pickle
 from src.linear_regression import mainprog
+from src.linear_regression import mecprog
+from src.linear_regression import label_decode_kab
 
 import locale
 import pymysql
@@ -20,6 +22,7 @@ mydb = pymysql.connect(
 )
 
 #Reading data
+
 file_path_dataset = 'static/data/data harga rumah clean baru.csv'
 file_path_heatmap = 'static/data/heatmap_data.csv'
 data_df = pd.read_csv(file_path_dataset)
@@ -29,36 +32,75 @@ data_heatmap = pd.read_csv(file_path_heatmap)
 def index():
     datas =  data_df.groupby('luas_bangunan')['harga'].mean().reset_index()
     grouped_dict =  datas.to_dict(orient='list')
-    my_dict = {key: value for key, value in zip(grouped_dict['luas_bangunan'], grouped_dict['harga'])}
+    #my_dict = {key: value for key, value in zip(grouped_dict['luas_bangunan'], grouped_dict['harga'])}
     datas = datas[datas['harga'] == 1000000000000000000000000000]
-    return render_template('form.html',values=datas)
+    d = data_df.groupby("kabupaten")["harga"].mean()
+    kabs=[]
+    harga =[]
+    for x in range(0,8):
+        kabs.append(d.index[x].upper())
+        harga.append(int(d.values[x]))
+
+    d1 = pd.DataFrame({"kabupaten":kabs, "hasil_prediksi":harga})
+    d1 = d1.sort_values(by="hasil_prediksi",ascending=True)
+    d1 = d1.to_json(orient="records")
+    d1= json.loads(d1)
+
+    # Mengubah objek Python menjadi JSON tanpa escape
+    jsd = json.dumps(d1)
+    return render_template('form.html',values=[datas,jsd,datas])
 
 
 #Predict Data
 @app.route('/predict', methods=['POST'])
 def predict():
     values = request.values
+    kabs = label_decode_kab(int(values['kabupaten']))
 
-    # X_new = {'kamar_tidur': [int(values['kamar_tidur'])], 'kamar_mandi': [int(values['kamar_mandi'])], 'jmlh_lantai': [int(values['jmlh_lantai'])], 'luas_bangunan': [int(values['luas_bangunan'])], 'luas_tanah': [int(values['luas_tanah'])]}
-   
-    predict, val = mainprog(values['kabupaten'], int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah'])) 
-    # locale.setlocale(locale.LC_ALL, 'id_ID')
-  
-    # hasil1 = pd.DataFrame([[values['kabupaten'],values['luas_tanah'],values['luas_bangunan'],values['kamar_tidur'],values['kamar_mandi'],values['jmlh_lantai'],predict]], columns =[['Kabupaten','Luas Tanah','Luas Bangunan','Kamar Tidur','Kamar Mandi','Jumlah Lantai','Hasil Prediksi Harga']])
-    # hasil = pd.concat([hasil,hasil1]).reset_index(drop=True)
+    # predict di 1 kabupaten
+    d = mecprog(int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah'])) 
+    js= json.loads(d)
+
+    # Mengubah objek Python menjadi JSON tanpa escape
+    jsd = json.dumps(js)
+
+    predict, val = mainprog(int(values['kabupaten']), int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah'])) 
+    #dimatikan sementara
+    df1 = pd.DataFrame([[kabs , int(values['luas_tanah']) , int(values['luas_bangunan']), int(values['kamar_tidur']), int(values['kamar_mandi']),int(values['jmlh_lantai'])]],columns=[["kabupaten","luas_tanah","luas_bangunan","kamar_mandi","kamar_tidur","jumlah_lantai"]])
+
     if values !=None:
         query = "INSERT INTO prediksi (kabupaten , kamar_tidur , kamar_mandi , jumlah_lantai ,luas_bangunan , luas_tanah ,harga) VALUES(%s,%s,%s,%s,%s,%s,%s)"
-        values = (values['kabupaten'], int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah']), int(predict))
+        values = (kabs, int(values['kamar_tidur']), int(values['kamar_mandi']), int(values['jmlh_lantai']), int(values['luas_bangunan']), int(values['luas_tanah']), int(predict))
         mycursor = mydb.cursor()
         mycursor.execute(query,values)
         mydb.commit()
 
-    # formatted_price = locale.currency(predict, grouping=True)
-    return render_template('form.html', prediction_text='Hasil Prediksi Harga Rumah : Rp. {} '.format(int(predict)), values=val)
+    # predict di semua kabupaten
+
+    #parameter input
+    #pd.DataFrame({"kabupaten":kabs, "luas_tanah":int(values['luas_tanah']),"luas_bangunan":int(values['luas_bangunan']), "kamar_mandi":int(values['kamar_mandi']),"kamar_tidur":int(values['kamar_tidur']),"jmlh_lantai":int(values['jmlh_lantai'])})
+    # return df1
+    return render_template('form.html',prediction_text='Hasil Prediksi Harga Rumah : Rp. {:,.0f} '.format(int(predict)),values=[val,jsd,df1])
+    #return jsd
 
 @app.route('/heatmap')
 def heatmap():
-    return render_template('heatmap.html')
+    d = data_df.groupby("kabupaten")["harga"].mean()
+    kabs=[]
+    harga =[]
+    for x in range(0,8):
+        kabs.append(d.index[x].upper())
+        harga.append(int(d.values[x]))
+
+    d1 = pd.DataFrame({"kabupaten":kabs, "hasil_prediksi":harga})
+    d1 = d1.sort_values(by="hasil_prediksi",ascending=True)
+    d1 = d1.to_json(orient="records")
+    d1= json.loads(d1)
+
+    # Mengubah objek Python menjadi JSON tanpa escape
+    jsd = json.dumps(d1)
+    return render_template('heatmap.html', values=[jsd])
+
 
 @app.route('/get_heatmap_data')
 def get_heatmap_data():
@@ -118,7 +160,7 @@ def get_lolipopchart_data():
 
 @app.route('/laporan')
 def laporan():
-    query = "SELECT * FROM prediksi ORDER BY harga ASC"
+    query = "SELECT * FROM prediksi ORDER BY id_data_predict DESC"
     mycursor = mydb.cursor()
     mycursor.execute(query)
     datas = mycursor.fetchall()

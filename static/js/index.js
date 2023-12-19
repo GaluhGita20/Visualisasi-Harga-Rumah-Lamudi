@@ -219,7 +219,7 @@ fetch('/get_scatterplot_dataLT')
 // HEATMAP
 // set the dimensions and margins of the graph
 var margin = {top: 10, right: 30, bottom: 40, left: 100},
-    width = 700 - margin.left - margin.right,
+    width = 900 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
@@ -230,7 +230,7 @@ var svg4 = d3.select("#heatmap")
 .append("g")
   .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
-
+        
 //Read the data
 d3.csv("static/data/heatmap_data.csv", function(data) {
 
@@ -240,7 +240,7 @@ d3.csv("static/data/heatmap_data.csv", function(data) {
 
   // Build X scales and axis:
   var x = d3.scaleBand()
-    .range([ 0, 600 ])
+    .range([ 0, 800 ])
     .domain(myGroups)
     .padding(0.05);
   svg4.append("g")
@@ -334,10 +334,7 @@ svg4.append("text")
         .style("fill", "grey")
         .style("max-width", 400)
         .text("A short description of the take-away message of this chart.");
-
-
-
-
+        
 // LOLIPOP CHART
 var margin = {top: 10, right: 30, bottom: 40, left: 100},
     width = 460 - margin.left - margin.right,
